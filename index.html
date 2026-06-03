@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluación — Laboratorio de Computación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #3b82f6;
+    --accent2: #06b6d4;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --comp-color: #6366f1;
+    --prog-color: #06b6d4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ========== LOGIN SCREEN ========== */
+  #loginScreen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    background: var(--bg);
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px;
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 80px rgba(59,130,246,0.08), 0 25px 50px rgba(0,0,0,0.5);
+  }
+
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--comp-color), var(--accent), var(--prog-color));
+  }
+
+  .login-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .login-logo svg {
+    width: 40px; height: 40px;
+  }
+
+  .login-logo-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .login-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, #fff, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .login-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 36px;
+    line-height: 1.5;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  .form-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+  }
+
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .password-field {
+    position: relative;
+  }
+
+  .password-field .form-input {
+    padding-right: 46px;
+  }
+
+  .pw-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--comp-color));
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .error-msg {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #fca5a5;
+    font-size: 13px;
+    margin-top: 14px;
+    display: none;
+  }
+
+  .blocked-msg {
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 8px;
+    padding: 20px;
+    color: #fde68a;
+    font-size: 14px;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* ========== EXAM SCREEN ========== */
+  #examScreen { display: none; position: relative; z-index: 1; }
+
+  .exam-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .exam-header-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .exam-logo {
+    font-size: 15px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--prog-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .student-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .student-badge span { color: var(--text); font-weight: 600; }
+
+  .score-display {
+    display: flex;
+    gap: 16px;
+  }
+
+  .score-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 13px;
+  }
+
+  .score-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .dot-comp { background: var(--comp-color); }
+  .dot-prog { background: var(--prog-color); }
+
+  .score-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    height: 3px;
+    background: var(--border);
+    position: sticky;
+    top: 64px;
+    z-index: 49;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--comp-color), var(--accent), var(--prog-color));
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* Exam body */
+  .exam-body {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 24px 120px;
+  }
+
+  .student-info-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 28px;
+    display: flex;
+    gap: 32px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .info-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .info-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* Section header */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .section-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .section-icon-comp { background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); }
+  .section-icon-prog { background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.3); }
+
+  .section-title { font-size: 22px; font-weight: 700; }
+  .section-comp { color: var(--comp-color); }
+  .section-prog { color: var(--prog-color); }
+
+  .section-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+    margin: 40px 0;
+  }
+
+  /* Question card */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 18px;
+    transition: border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+
+  .question-card.answered-correct::before { background: var(--green); }
+  .question-card.answered-wrong::before { background: var(--red); }
+  .question-card.answered-pending::before { background: var(--accent); }
+
+  .question-card.comp-card::before { background: rgba(99,102,241,0.4); }
+  .question-card.prog-card::before { background: rgba(6,182,212,0.4); }
+
+  .question-number {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .question-text {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .question-text code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 14px;
+    color: var(--accent2);
+  }
+
+  /* Options */
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    width: 100%;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(59,130,246,0.07);
+    transform: translateX(3px);
+  }
+
+  .option-btn:disabled { cursor: default; transform: none; }
+
+  .option-btn.selected-correct {
+    border-color: var(--green);
+    background: rgba(16,185,129,0.1);
+    color: #6ee7b7;
+  }
+
+  .option-btn.selected-wrong {
+    border-color: var(--red);
+    background: rgba(239,68,68,0.1);
+    color: #fca5a5;
+  }
+
+  .option-btn.show-correct {
+    border-color: var(--green);
+    background: rgba(16,185,129,0.06);
+    color: #6ee7b7;
+  }
+
+  .option-letter {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .option-btn.selected-correct .option-letter { background: var(--green); color: white; }
+  .option-btn.selected-wrong .option-letter { background: var(--red); color: white; }
+  .option-btn.show-correct .option-letter { background: var(--green); color: white; }
+
+  .option-text { flex: 1; line-height: 1.4; }
+
+  /* Submit section */
+  #submitSection {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-top: 40px;
+    text-align: center;
+    display: none;
+  }
+
+  .submit-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .submit-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+
+  .btn-submit {
+    background: linear-gradient(135deg, var(--green), #059669);
+    border: none;
+    border-radius: 12px;
+    padding: 16px 48px;
+    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
+
+  /* Results modal */
+  #resultsModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .results-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 120px rgba(59,130,246,0.12), 0 40px 80px rgba(0,0,0,0.6);
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .results-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--comp-color), var(--green), var(--prog-color));
+  }
+
+  .results-emoji { font-size: 64px; margin-bottom: 16px; }
+  .results-title { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+  .results-name { color: var(--accent2); font-size: 18px; font-weight: 600; margin-bottom: 28px; }
+
+  .score-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .score-box {
+    border-radius: 14px;
+    padding: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .score-box-comp { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.3); }
+  .score-box-prog { background: rgba(6,182,212,0.1); border-color: rgba(6,182,212,0.3); }
+
+  .score-box-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .score-box-num { font-size: 36px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .score-box-comp .score-box-num { color: var(--comp-color); }
+  .score-box-prog .score-box-num { color: var(--prog-color); }
+  .score-box-total { font-size: 13px; color: var(--text-muted); }
+
+  .total-score-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 28px;
+  }
+
+  .total-score-label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .total-score-num { font-size: 42px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--green); }
+
+  .results-msg { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-card {
+    animation: fadeInUp 0.3s ease both;
+  }
+
+  .question-card:nth-child(1) { animation-delay: 0.05s; }
+  .question-card:nth-child(2) { animation-delay: 0.1s; }
+  .question-card:nth-child(3) { animation-delay: 0.15s; }
+  .question-card:nth-child(4) { animation-delay: 0.2s; }
+  .question-card:nth-child(5) { animation-delay: 0.25s; }
+
+  /* Loader */
+  .spinner {
+    display: inline-block;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 600px) {
+    .exam-header { padding: 0 16px; flex-wrap: wrap; height: auto; padding: 12px 16px; gap: 8px; }
+    .exam-body { padding: 24px 16px 80px; }
+    .form-row { grid-template-columns: 1fr; }
+    .score-grid { grid-template-columns: 1fr; }
+    .login-card { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN SCREEN ========== -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="10" fill="url(#grad)"/>
+        <path d="M12 15l6 5-6 5M22 25h6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs>
+          <linearGradient id="grad" x1="0" y1="0" x2="40" y2="40">
+            <stop offset="0%" stop-color="#6366f1"/>
+            <stop offset="100%" stop-color="#06b6d4"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="login-logo-text">Laboratorio de Computación</span>
+    </div>
+    <div class="login-title">Evaluación en Línea</div>
+    <div class="login-subtitle">Completa tus datos y la contraseña del día para iniciar la evaluación.</div>
+
+    <div id="loginForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nombres</label>
+          <input type="text" id="nombres" class="form-input" placeholder="Ej: Juan Carlos">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Apellidos</label>
+          <input type="text" id="apellidos" class="form-input" placeholder="Ej: García López">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Jornada</label>
+          <select id="jornada" class="form-input form-select">
+            <option value="">Seleccionar...</option>
+            <option value="Diario">Diario</option>
+            <option value="Sábado">Sábado</option>
+            <option value="Domingo">Domingo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">No. de Máquina</label>
+          <input type="number" id="maquina" class="form-input" placeholder="Ej: 12" min="1" max="99">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Contraseña del día</label>
+        <div class="password-field">
+          <input type="password" id="password" class="form-input" placeholder="Ingresa la contraseña">
+          <button class="pw-toggle" onclick="togglePw()">
+            <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="error-msg" id="errorMsg"></div>
+      <button class="btn-primary" id="loginBtn" onclick="handleLogin()">Iniciar Evaluación</button>
+    </div>
+
+    <div class="blocked-msg" id="blockedMsg" style="display:none">
+      ⚠️ <strong>Acceso bloqueado</strong><br><br>
+      Ya realizaste esta evaluación desde esta computadora.<br>No puedes ingresar por segunda vez.
+    </div>
+  </div>
+</div>
+
+<!-- ========== EXAM SCREEN ========== -->
+<div id="examScreen">
+  <header class="exam-header">
+    <div class="exam-header-left">
+      <div class="exam-logo">Evaluación Lab</div>
+      <div class="student-badge" id="headerStudent"></div>
+    </div>
+    <div class="score-display">
+      <div class="score-pill">
+        <div class="score-dot dot-comp"></div>
+        <span style="color:var(--text-muted);font-size:12px">Computación</span>
+        <span class="score-val" id="scoreComp" style="color:var(--comp-color)">—/20</span>
+      </div>
+      <div class="score-pill">
+        <div class="score-dot dot-prog"></div>
+        <span style="color:var(--text-muted);font-size:12px">Programación</span>
+        <span class="score-val" id="scoreProg" style="color:var(--prog-color)">—/20</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressBar"></div>
+  </div>
+
+  <div class="exam-body">
+    <div class="student-info-bar" id="studentInfoBar"></div>
+
+    <!-- Section 1: Computación -->
+    <div class="section-header">
+      <div class="section-icon section-icon-comp">💻</div>
+      <div>
+        <div class="section-title section-comp">Sección I — Computación</div>
+        <div class="section-meta">Microsoft Excel · 10 preguntas aleatorias · 2 pts cada una</div>
+      </div>
+    </div>
+    <div id="compQuestions"></div>
+
+    <div class="section-divider"></div>
+
+    <!-- Section 2: Programación -->
+    <div class="section-header">
+      <div class="section-icon section-icon-prog">🐍</div>
+      <div>
+        <div class="section-title section-prog">Sección II — Programación</div>
+        <div class="section-meta">Python · 10 preguntas · 2 pts cada una</div>
+      </div>
+    </div>
+    <div id="progQuestions"></div>
+
+    <div id="submitSection">
+      <div class="submit-title">¿Listo para entregar?</div>
+      <div class="submit-sub">Revisa tus respuestas antes de enviar. Una vez enviado no podrás modificar nada.</div>
+      <button class="btn-submit" onclick="submitExam()">Enviar evaluación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== RESULTS MODAL ========== -->
+<div id="resultsModal">
+  <div class="results-card">
+    <div class="results-emoji" id="resultsEmoji">🎉</div>
+    <div class="results-title">¡Evaluación completada!</div>
+    <div class="results-name" id="resultsName"></div>
+    <div class="score-grid">
+      <div class="score-box score-box-comp">
+        <div class="score-box-label">Computación</div>
+        <div class="score-box-num" id="rComp">0</div>
+        <div class="score-box-total">de 20 puntos</div>
+      </div>
+      <div class="score-box score-box-prog">
+        <div class="score-box-label">Programación</div>
+        <div class="score-box-num" id="rProg">0</div>
+        <div class="score-box-total">de 20 puntos</div>
+      </div>
+    </div>
+    <div class="total-score-box">
+      <div class="total-score-label">Puntaje Total</div>
+      <div class="total-score-num" id="rTotal">0/40</div>
+    </div>
+    <div class="results-msg" id="resultsMsg"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURATION — loaded from config.js / localStorage (admin)
+// ============================================================
+function getConfig() {
+  try {
+    const saved = localStorage.getItem('examConfig');
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return {
+    password: 'bio2026',
+    activeDate: '',       // 'YYYY-MM-DD' or empty = any day
+    startTime: '',        // 'HH:MM' or empty
+    endTime: '',          // 'HH:MM' or empty
+    examTitle: 'Evaluación — Computación y Programación',
+    enabled: true
+  };
+}
+
+// ============================================================
+// QUESTION BANK
+// ============================================================
+const COMP_BANK = [
+  {
+    id: 'c1',
+    text: '¿Cuál es el símbolo obligatorio para iniciar cualquier fórmula o función en una celda?',
+    options: ['+', '*', '=', '@'],
+    correct: '=',
+    type: 'multi'
+  },
+  {
+    id: 'c2',
+    text: '¿Qué función utilizarías para sumar las ventas de un rango, pero solo si pertenecen a la categoría "Electrónicos"?',
+    options: ['=SUMA()', '=SUMAR.SI()', '=CONTAR.SI()', '=BUSCARV()'],
+    correct: '=SUMAR.SI()',
+    type: 'multi'
+  },
+  {
+    id: 'c3',
+    text: 'Si necesitas promediar los sueldos de los empleados que sean de la sección "Ventas" y que tengan más de 5 años de antigüedad, la función correcta es:',
+    options: ['=PROMEDIO.SI()', '=PROMEDIO()', '=PROMEDIO.SI.CONJUNTO()', '=SUMAR.SI.CONJUNTO()'],
+    correct: '=PROMEDIO.SI.CONJUNTO()',
+    type: 'multi'
+  },
+  {
+    id: 'c4',
+    text: 'En la función =BUSCARV(A2;B2:D10;3;0), ¿qué indica el número 3?',
+    options: [
+      'Que se busca el número 3 en la tabla.',
+      'Que el resultado se encuentra en la tercera columna del rango seleccionado.',
+      'Que se deben comparar 3 filas.',
+      'Que la coincidencia es aproximada.'
+    ],
+    correct: 'Que el resultado se encuentra en la tercera columna del rango seleccionado.',
+    type: 'multi'
+  },
+  {
+    id: 'c5',
+    text: '¿Qué herramienta de Excel se usa para impedir que un usuario escriba texto en una celda que solo debería contener números del 1 al 10?',
+    options: ['Formato condicional', 'Validación de datos', 'Protección de hoja', 'Filtros avanzados'],
+    correct: 'Validación de datos',
+    type: 'multi'
+  },
+  {
+    id: 'c6',
+    text: 'Para unir el texto de dos celdas (por ejemplo, Nombre y Apellido) en una sola, usamos:',
+    options: ['=UNIR.CELDAS()', '=SUMA()', '=CONCATENAR()', '=BUSCARV()'],
+    correct: '=CONCATENAR()',
+    type: 'multi'
+  },
+  {
+    id: 'c7',
+    text: 'Tienes una lista de productos en la columna A y sus precios en la columna B. ¿Qué fórmula es la correcta para sumar solo los productos que cuestan más de 50?',
+    options: [
+      '=SUMAR.SI(B2:B10;">50")',
+      '=SUMAR.SI(B2:B10;>50;B2:B10)',
+      '=SUMAR.SI(">50";B2:B10)',
+      '=SUMA(B2:B10>50)'
+    ],
+    correct: '=SUMAR.SI(B2:B10;">50")',
+    type: 'multi'
+  },
+  {
+    id: 'c8',
+    text: 'Si quieres obtener el promedio de notas de la columna C, pero solo de los alumnos que en la columna B tienen "Aprobado", ¿cuál es la sintaxis correcta?',
+    options: [
+      '=PROMEDIO.SI(B2:B20;"Aprobado")',
+      '=PROMEDIO.SI(C2:C20;"Aprobado";B2:B20)',
+      '=PROMEDIO.SI(B2:B20;"Aprobado";C2:C20)',
+      '=PROMEDIO(B2:B20="Aprobado")'
+    ],
+    correct: '=PROMEDIO.SI(B2:B20;"Aprobado";C2:C20)',
+    type: 'multi'
+  },
+  {
+    id: 'c9',
+    text: 'Un profesor quiere unir el nombre (A2) y el código (B2) de un alumno para que aparezca como "Juan-101". ¿Qué fórmula debe usar?',
+    options: [
+      '=CONCATENAR(A2;-;B2)',
+      '=CONCATENAR(A2;"-";B2)',
+      '=CONCATENAR(A2&"-"&B2)',
+      '=SUMA(A2;"-";B2)'
+    ],
+    correct: '=CONCATENAR(A2;"-";B2)',
+    type: 'multi'
+  },
+  {
+    id: 'c10',
+    text: 'Necesitas buscar el precio de un "Teclado" en una tabla que va de A2 a C10. El nombre del producto está en la columna A y el precio en la columna C. ¿Qué fórmula usarías?',
+    options: [
+      '=BUSCARV("Teclado";A2:C10;1;0)',
+      '=BUSCARV("Teclado";A2:C10;3;0)',
+      '=BUSCARV(A2:C10;"Teclado";3)',
+      '=BUSCARV("Teclado";A2:C10;2;0)'
+    ],
+    correct: '=BUSCARV("Teclado";A2:C10;3;0)',
+    type: 'multi'
+  },
+  {
+    id: 'c11',
+    text: '¿Cuál de estas fórmulas sumará las ventas de la columna C solo si el vendedor es "Ana" y la zona es "Norte"?',
+    options: [
+      '=SUMAR.SI(A2:A10;"Ana";B2:B10;"Norte";C2:C10)',
+      '=SUMAR.SI.CONJUNTO(A2:A10;"Ana";B2:B10;"Norte")',
+      '=SUMAR.SI.CONJUNTO(C2:C10;A2:A10;"Ana";B2:B10;"Norte")',
+      '=SUMAR.SI.CONJUNTO(A2:A10;B2:B10;C2:C10;"Ana";"Norte")'
+    ],
+    correct: '=SUMAR.SI.CONJUNTO(C2:C10;A2:A10;"Ana";B2:B10;"Norte")',
+    type: 'multi'
+  },
+  {
+    id: 'c12',
+    text: '¿Qué es un rango de celdas?',
+    options: [
+      'Una sola celda de Excel.',
+      'Un conjunto de celdas seleccionadas dentro de una hoja de cálculo.',
+      'Una hoja completa de Excel.',
+      'Una fórmula de Excel.'
+    ],
+    correct: 'Un conjunto de celdas seleccionadas dentro de una hoja de cálculo.',
+    type: 'multi'
+  },
+  {
+    id: 'c13',
+    text: '¿Qué es una celda?',
+    options: [
+      'La intersección entre una fila y una columna.',
+      'Un conjunto de hojas de cálculo.',
+      'Una fórmula de Excel.',
+      'Una fila completa.'
+    ],
+    correct: 'La intersección entre una fila y una columna.',
+    type: 'multi'
+  },
+  {
+    id: 'c14',
+    text: '¿Qué es Microsoft Windows?',
+    options: [
+      'Un programa para crear hojas de cálculo.',
+      'Un sistema operativo que administra los recursos del computador.',
+      'Un navegador web.',
+      'Un antivirus.'
+    ],
+    correct: 'Un sistema operativo que administra los recursos del computador.',
+    type: 'multi'
+  },
+  {
+    id: 'c15',
+    text: '¿Por qué caracteres se identifican las columnas en Microsoft Excel?',
+    options: ['Números.', 'Símbolos especiales.', 'Letras del alfabeto.', 'Fechas.'],
+    correct: 'Letras del alfabeto.',
+    type: 'multi'
+  },
+  {
+    id: 'c16',
+    text: 'La función CONTAR sirve para contar celdas que contienen tanto palabras como números.',
+    options: ['Verdadero', 'Falso'],
+    correct: 'Falso',
+    type: 'truefalse'
+  },
+  {
+    id: 'c17',
+    text: 'En la función SUMAR.SI.CONJUNTO, el rango que contiene los valores numéricos a sumar se selecciona al principio de la fórmula.',
+    options: ['Verdadero', 'Falso'],
+    correct: 'Verdadero',
+    type: 'truefalse'
+  },
+  {
+    id: 'c18',
+    text: 'Para que la función BUSCARV funcione correctamente, el valor que estamos buscando debe estar en la última columna de nuestra tabla.',
+    options: ['Verdadero', 'Falso'],
+    correct: 'Falso',
+    type: 'truefalse'
+  },
+  {
+    id: 'c19',
+    text: 'En una validación de datos de tipo "Lista", si escribes Enero;Febrero;Marzo en el origen, Excel creará un menú desplegable con esos tres meses.',
+    options: ['Verdadero', 'Falso'],
+    correct: 'Verdadero',
+    type: 'truefalse'
+  },
+  {
+    id: 'c20',
+    text: 'Si la función BUSCARV no encuentra el valor exacto y el último argumento es 0, la celda mostrará el error #N/D.',
+    options: ['Verdadero', 'Falso'],
+    correct: 'Verdadero',
+    type: 'truefalse'
+  }
+];
+
+const PROG_QUESTIONS = [
+  {
+    id: 'p1',
+    text: '¿Qué es una lista en Python?',
+    options: [
+      'Un tipo de dato que almacena múltiples elementos en una sola variable.',
+      'Un operador matemático.',
+      'Una función para imprimir datos.',
+      'Un ciclo de repetición.'
+    ],
+    correct: 'Un tipo de dato que almacena múltiples elementos en una sola variable.',
+    type: 'multi'
+  },
+  {
+    id: 'p2',
+    text: '¿Para qué sirve el ciclo while?',
+    options: [
+      'Para crear listas.',
+      'Para repetir un bloque de código mientras una condición sea verdadera.',
+      'Para comparar valores.',
+      'Para finalizar un programa.'
+    ],
+    correct: 'Para repetir un bloque de código mientras una condición sea verdadera.',
+    type: 'multi'
+  },
+  {
+    id: 'p3',
+    text: '¿Para qué sirve el ciclo for?',
+    options: [
+      'Para recorrer elementos de una secuencia o colección.',
+      'Para crear funciones.',
+      'Para declarar variables.',
+      'Para tomar decisiones.'
+    ],
+    correct: 'Para recorrer elementos de una secuencia o colección.',
+    type: 'multi'
+  },
+  {
+    id: 'p4',
+    text: '¿Qué hace la función append()?',
+    options: [
+      'Elimina un elemento de una lista.',
+      'Ordena una lista.',
+      'Agrega un elemento al final de una lista.',
+      'Busca un elemento en una lista.'
+    ],
+    correct: 'Agrega un elemento al final de una lista.',
+    type: 'multi'
+  },
+  {
+    id: 'p5',
+    text: '¿Qué es una condición?',
+    options: [
+      'Una variable numérica.',
+      'Una expresión que puede evaluarse como verdadera o falsa.',
+      'Un tipo de lista.',
+      'Una función integrada.'
+    ],
+    correct: 'Una expresión que puede evaluarse como verdadera o falsa.',
+    type: 'multi'
+  },
+  {
+    id: 'p6',
+    text: '¿Cuál es la diferencia entre if y elif?',
+    options: [
+      'No existe diferencia.',
+      'if inicia una estructura condicional y elif agrega condiciones adicionales.',
+      'elif se usa para ciclos.',
+      'if solo funciona con números.'
+    ],
+    correct: 'if inicia una estructura condicional y elif agrega condiciones adicionales.',
+    type: 'multi'
+  },
+  {
+    id: 'p7',
+    text: '¿Qué símbolo se utiliza para comparar si dos valores son iguales?',
+    options: ['=', '!=', '==', '>='],
+    correct: '==',
+    type: 'multi'
+  },
+  {
+    id: 'p8',
+    text: '¿Qué instrucción se utiliza para finalizar un ciclo antes de que termine normalmente?',
+    options: ['continue', 'stop', 'exit', 'break'],
+    correct: 'break',
+    type: 'multi'
+  },
+  {
+    id: 'p9',
+    text: '¿Qué hace la función index()?',
+    options: [
+      'Agrega un elemento a una lista.',
+      'Devuelve la posición de un elemento dentro de una lista.',
+      'Elimina un elemento de una lista.',
+      'Cuenta los elementos de una lista.'
+    ],
+    correct: 'Devuelve la posición de un elemento dentro de una lista.',
+    type: 'multi'
+  },
+  {
+    id: 'p10',
+    text: '¿Qué estructura se utiliza para tomar decisiones en Python?',
+    options: ['for', 'while', 'if', 'append'],
+    correct: 'if',
+    type: 'multi'
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let studentData = {};
+let selectedComp = [];
+let selectedProg = [];
+let answers = {};
+let answeredCount = 0;
+let totalQuestions = 20;
+let examSubmitted = false;
+const STORAGE_KEY = 'examDone_v1';
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickRandom(arr, n) {
+  return shuffle(arr).slice(0, n);
+}
+
+function letters(i) {
+  return ['A','B','C','D','E','F'][i];
+}
+
+// ============================================================
+// CHECK IF ALREADY DONE
+// ============================================================
+function checkAlreadyDone() {
+  const cfg = getConfig();
+  const done = localStorage.getItem(STORAGE_KEY);
+  if (!done) return false;
+  try {
+    const d = JSON.parse(done);
+    // Reset if date changed (new exam day)
+    if (cfg.activeDate && d.date !== cfg.activeDate) {
+      localStorage.removeItem(STORAGE_KEY);
+      return false;
+    }
+    return true;
+  } catch(e) { return false; }
+}
+
+// ============================================================
+// LOGIN
+// ============================================================
+function togglePw() {
+  const inp = document.getElementById('password');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+function handleLogin() {
+  if (checkAlreadyDone()) {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('blockedMsg').style.display = 'block';
+    return;
+  }
+
+  const nombres = document.getElementById('nombres').value.trim();
+  const apellidos = document.getElementById('apellidos').value.trim();
+  const jornada = document.getElementById('jornada').value;
+  const maquina = document.getElementById('maquina').value.trim();
+  const pw = document.getElementById('password').value;
+
+  if (!nombres || !apellidos || !jornada || !maquina) {
+    showError('Por favor completa todos los campos.');
+    return;
+  }
+
+  const cfg = getConfig();
+
+  if (!cfg.enabled) {
+    showError('La evaluación no está disponible en este momento.');
+    return;
+  }
+
+  // Date check
+  if (cfg.activeDate) {
+    const today = new Date().toISOString().slice(0,10);
+    if (today !== cfg.activeDate) {
+      showError('La evaluación no está disponible en esta fecha.');
+      return;
+    }
+  }
+
+  // Time check
+  if (cfg.startTime || cfg.endTime) {
+    const now = new Date();
+    const hm = now.getHours() * 60 + now.getMinutes();
+    if (cfg.startTime) {
+      const [h,m] = cfg.startTime.split(':').map(Number);
+      if (hm < h*60+m) { showError(`La evaluación inicia a las ${cfg.startTime}.`); return; }
+    }
+    if (cfg.endTime) {
+      const [h,m] = cfg.endTime.split(':').map(Number);
+      if (hm > h*60+m) { showError(`La evaluación finalizó a las ${cfg.endTime}.`); return; }
+    }
+  }
+
+  // Password check
+  if (pw !== cfg.password) {
+    showError('Contraseña incorrecta. Consulta con tu profesor.');
+    return;
+  }
+
+  studentData = { nombres, apellidos, jornada, maquina, startTime: new Date().toISOString() };
+  startExam();
+}
+
+// ============================================================
+// BUILD EXAM
+// ============================================================
+function startExam() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('examScreen').style.display = 'block';
+
+  // Header info
+  document.getElementById('headerStudent').innerHTML =
+    `<span>${studentData.nombres} ${studentData.apellidos}</span> · ${studentData.jornada} · Máq. ${studentData.maquina}`;
+
+  // Student info bar
+  document.getElementById('studentInfoBar').innerHTML = `
+    <div class="info-item"><div class="info-label">Nombres</div><div class="info-value">${studentData.nombres}</div></div>
+    <div class="info-item"><div class="info-label">Apellidos</div><div class="info-value">${studentData.apellidos}</div></div>
+    <div class="info-item"><div class="info-label">Jornada</div><div class="info-value">${studentData.jornada}</div></div>
+    <div class="info-item"><div class="info-label">No. Máquina</div><div class="info-value">${studentData.maquina}</div></div>
+    <div class="info-item"><div class="info-label">Inicio</div><div class="info-value">${new Date().toLocaleTimeString('es-GT', {hour:'2-digit',minute:'2-digit'})}</div></div>
+  `;
+
+  // Pick & render questions
+  selectedComp = pickRandom(COMP_BANK, 10);
+  selectedProg = shuffle(PROG_QUESTIONS);
+
+  renderQuestions('compQuestions', selectedComp, 'comp', 'comp-card');
+  renderQuestions('progQuestions', selectedProg, 'prog', 'prog-card');
+}
+
+function renderQuestions(containerId, questions, section, cardClass) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+
+  questions.forEach((q, idx) => {
+    const options = q.type === 'truefalse' ? shuffle([...q.options]) : shuffle([...q.options]);
+    const card = document.createElement('div');
+    card.className = `question-card ${cardClass}`;
+    card.id = `qcard-${q.id}`;
+
+    const optionsHtml = options.map((opt, oi) => `
+      <button class="option-btn" id="opt-${q.id}-${oi}"
+        onclick="selectAnswer('${q.id}', '${section}', this, '${escapeAttr(opt)}', '${escapeAttr(q.correct)}')">
+        <span class="option-letter">${letters(oi)}</span>
+        <span class="option-text">${opt}</span>
+      </button>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="question-number">${section === 'comp' ? 'COMPUTACIÓN' : 'PROGRAMACIÓN'} · Pregunta ${idx + 1} de 10</div>
+      <div class="question-text">${q.text}</div>
+      <div class="options-list">${optionsHtml}</div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+function escapeAttr(str) {
+  return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// ============================================================
+// ANSWER LOGIC
+// ============================================================
+function selectAnswer(qId, section, clickedBtn, selectedOpt, correctOpt) {
+  if (answers[qId] !== undefined) return; // already answered
+
+  const isCorrect = selectedOpt === correctOpt;
+  answers[qId] = { selected: selectedOpt, correct: correctOpt, isCorrect, section };
+
+  answeredCount++;
+
+  // Disable all options for this question
+  const card = document.getElementById(`qcard-${qId}`);
+  const allBtns = card.querySelectorAll('.option-btn');
+
+  allBtns.forEach(btn => {
+    btn.disabled = true;
+    const optText = btn.querySelector('.option-text').textContent;
+    if (optText === correctOpt && !isCorrect) {
+      btn.classList.add('show-correct');
+    }
+  });
+
+  clickedBtn.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
+  card.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+
+  updateScores();
+  updateProgress();
+
+  if (answeredCount === totalQuestions) {
+    document.getElementById('submitSection').style.display = 'block';
+    document.getElementById('submitSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function updateScores() {
+  let comp = 0, prog = 0;
+  let compAnswered = 0, progAnswered = 0;
+
+  for (const [id, a] of Object.entries(answers)) {
+    if (a.section === 'comp') {
+      compAnswered++;
+      if (a.isCorrect) comp++;
+    } else {
+      progAnswered++;
+      if (a.isCorrect) prog++;
+    }
+  }
+
+  const compPts = comp * 2;
+  const progPts = prog * 2;
+
+  document.getElementById('scoreComp').textContent =
+    compAnswered > 0 ? `${compPts}/20` : '—/20';
+  document.getElementById('scoreProg').textContent =
+    progAnswered > 0 ? `${progPts}/20` : '—/20';
+}
+
+function updateProgress() {
+  const pct = (answeredCount / totalQuestions) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+// ============================================================
+// SUBMIT
+// ============================================================
+async function submitExam() {
+  if (examSubmitted) return;
+  examSubmitted = true;
+
+  const btn = document.querySelector('.btn-submit');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Enviando...';
+
+  let compCorrect = 0, progCorrect = 0;
+  for (const [id, a] of Object.entries(answers)) {
+    if (a.isCorrect) {
+      if (a.section === 'comp') compCorrect++;
+      else progCorrect++;
+    }
+  }
+
+  const compPts = compCorrect * 2;
+  const progPts = progCorrect * 2;
+  const total = compPts + progPts;
+  const endTime = new Date().toISOString();
+
+  // Save done flag
+  const cfg = getConfig();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    date: cfg.activeDate || new Date().toISOString().slice(0,10),
+    time: endTime
+  }));
+
+  // Save result for admin panel
+  const result = {
+    ...studentData,
+    compCorrect, progCorrect,
+    compPts, progPts, total,
+    endTime,
+    selectedCompIds: selectedComp.map(q => q.id),
+    answers: Object.fromEntries(Object.entries(answers).map(([k,v]) => [k, v.isCorrect]))
+  };
+
+  // Store in localStorage for admin to retrieve
+  const existing = JSON.parse(localStorage.getItem('examResults') || '[]');
+  existing.push(result);
+  localStorage.setItem('examResults', JSON.stringify(existing));
+
+  // Send to Google Sheets if configured
+  const sheetsUrl = localStorage.getItem('sheetsWebhookUrl') || '';
+  if (sheetsUrl) {
+    try {
+      await fetch(sheetsUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(result)
+      });
+    } catch(e) { console.warn('Sheets error:', e); }
+  }
+
+  showResults(compPts, progPts, total);
+}
+
+function showResults(compPts, progPts, total) {
+  document.getElementById('rComp').textContent = compPts;
+  document.getElementById('rProg').textContent = progPts;
+  document.getElementById('rTotal').textContent = `${total}/40`;
+  document.getElementById('resultsName').textContent =
+    `${studentData.nombres} ${studentData.apellidos}`;
+
+  const pct = (total / 40) * 100;
+  let emoji = '😔', msg = 'Sigue practicando, ¡la próxima lo harás mejor!';
+  if (pct >= 90) { emoji = '🏆'; msg = '¡Excelente resultado! Dominas muy bien los temas.'; }
+  else if (pct >= 75) { emoji = '🎉'; msg = '¡Muy buen trabajo! Tienes un sólido manejo de los temas.'; }
+  else if (pct >= 60) { emoji = '👍'; msg = '¡Aprobado! Hay algunos temas para reforzar.'; }
+  else if (pct >= 40) { emoji = '📚'; msg = 'Necesitas repasar los temas. ¡No te rindas!'; }
+
+  document.getElementById('resultsEmoji').textContent = emoji;
+  document.getElementById('resultsMsg').textContent = msg;
+  document.getElementById('resultsModal').style.display = 'flex';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  if (checkAlreadyDone()) {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('blockedMsg').style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>

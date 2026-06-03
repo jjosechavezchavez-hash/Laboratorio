@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel del Profesor — Laboratorio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #3b82f6;
+    --accent2: #06b6d4;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+    --comp-color: #6366f1;
+    --prog-color: #06b6d4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ========== ADMIN LOGIN ========== */
+  #adminLogin {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    background: var(--bg);
+  }
+
+  .admin-login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 0 80px rgba(245,158,11,0.08), 0 25px 50px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .admin-login-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--yellow), var(--red), var(--yellow));
+  }
+
+  .admin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--yellow);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .admin-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .admin-sub {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 32px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    margin-bottom: 16px;
+  }
+
+  .form-input:focus {
+    border-color: var(--yellow);
+    box-shadow: 0 0 0 3px rgba(245,158,11,0.12);
+  }
+
+  .btn-admin-login {
+    width: 100%;
+    background: linear-gradient(135deg, var(--yellow), #d97706);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-admin-login:hover { opacity: 0.9; }
+
+  .admin-error {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #fca5a5;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* ========== ADMIN PANEL ========== */
+  #adminPanel { display: none; position: relative; z-index: 1; }
+
+  .admin-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .admin-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .header-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .teacher-badge-header {
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--yellow);
+  }
+
+  .btn-logout {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: var(--text-muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .btn-logout:hover { color: var(--text); border-color: var(--text-muted); }
+
+  /* Tabs */
+  .tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding: 0 32px;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 14px 20px;
+    color: var(--text-muted);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .tab-count {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Panel body */
+  .panel-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ========== CONFIG TAB ========== */
+  .config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .config-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+
+  .config-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .config-card-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .config-field {
+    margin-bottom: 16px;
+  }
+
+  .config-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+
+  .config-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .config-input:focus { border-color: var(--accent); }
+
+  .config-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .toggle-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .toggle-label { font-size: 14px; color: var(--text); }
+  .toggle-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .toggle input { opacity: 0; width: 0; height: 0; }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    background: white;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: transform 0.2s;
+  }
+
+  .toggle input:checked + .toggle-slider { background: var(--green); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+  .btn-save {
+    background: linear-gradient(135deg, var(--accent), var(--comp-color));
+    border: none;
+    border-radius: 10px;
+    padding: 13px 28px;
+    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 4px;
+  }
+
+  .btn-save:hover { opacity: 0.9; }
+
+  .save-confirm {
+    font-size: 13px;
+    color: var(--green);
+    margin-top: 10px;
+    display: none;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ========== RESULTS TAB ========== */
+  .results-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .search-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    outline: none;
+    width: 280px;
+    transition: border-color 0.2s;
+  }
+
+  .search-input:focus { border-color: var(--accent); }
+
+  .filter-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 36px 10px 16px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+  }
+
+  .btn-export {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    color: var(--text-dim);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-export:hover { border-color: var(--green); color: var(--green); }
+
+  .btn-clear {
+    background: var(--surface);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 10px;
+    padding: 10px 18px;
+    color: #fca5a5;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: auto;
+  }
+
+  .btn-clear:hover { background: rgba(239,68,68,0.08); }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+  }
+
+  .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Results table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead { background: var(--surface2); }
+
+  th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 16px 20px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(30,45,69,0.6);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(59,130,246,0.03); }
+
+  .td-name { font-weight: 600; }
+  .td-mono { font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .score-comp { background: rgba(99,102,241,0.12); color: var(--comp-color); }
+  .score-prog { background: rgba(6,182,212,0.12); color: var(--prog-color); }
+
+  .total-badge {
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .total-high { background: rgba(16,185,129,0.12); color: var(--green); }
+  .total-mid { background: rgba(245,158,11,0.12); color: var(--yellow); }
+  .total-low { background: rgba(239,68,68,0.12); color: var(--red); }
+
+  .jornada-chip {
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .j-diario { background: rgba(59,130,246,0.12); color: var(--accent); }
+  .j-sabado { background: rgba(99,102,241,0.12); color: var(--comp-color); }
+  .j-domingo { background: rgba(6,182,212,0.12); color: var(--prog-color); }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state-title { font-size: 16px; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
+  .empty-state-sub { font-size: 13px; }
+
+  /* Sheets setup card */
+  .sheets-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .sheets-info { flex: 1; }
+  .sheets-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .sheets-sub { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  .sheets-input-wrap { display: flex; gap: 10px; flex: 2; }
+
+  .sheets-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    outline: none;
+  }
+
+  .btn-sheets-save {
+    background: linear-gradient(135deg, var(--green), #059669);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    .config-grid { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    .admin-header { padding: 0 16px; }
+    th:nth-child(5), td:nth-child(5) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== ADMIN LOGIN ========== -->
+<div id="adminLogin">
+  <div class="admin-login-card">
+    <div class="admin-badge">🔐 Acceso Restringido</div>
+    <div class="admin-title">Panel del Profesor</div>
+    <div class="admin-sub">Ingresa la contraseña de administrador para acceder al panel de control.</div>
+    <label class="form-label">Contraseña de Administrador</label>
+    <input type="password" id="adminPw" class="form-input" placeholder="Contraseña admin" onkeydown="if(event.key==='Enter') adminLogin()">
+    <button class="btn-admin-login" onclick="adminLogin()">Acceder al Panel</button>
+    <div class="admin-error" id="adminError">Contraseña incorrecta.</div>
+  </div>
+</div>
+
+<!-- ========== ADMIN PANEL ========== -->
+<div id="adminPanel">
+  <header class="admin-header">
+    <div class="admin-header-left">
+      <div class="header-title">Panel del Profesor</div>
+      <div class="teacher-badge-header">🔐 Administrador</div>
+    </div>
+    <button class="btn-logout" onclick="adminLogout()">Cerrar sesión</button>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('config', this)">⚙️ Configuración</button>
+    <button class="tab-btn" onclick="switchTab('results', this)">
+      📊 Resultados
+      <span class="tab-count" id="resultsCount">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('sheets', this)">🔗 Google Sheets</button>
+  </div>
+
+  <div class="panel-body">
+
+    <!-- ===== CONFIG TAB ===== -->
+    <div class="tab-content active" id="tab-config">
+      <div class="config-grid">
+
+        <!-- Access Control -->
+        <div class="config-card">
+          <div class="config-card-title">🔑 Control de Acceso</div>
+          <div class="config-card-sub">Configura la contraseña que usarán los alumnos para ingresar al examen.</div>
+
+          <div class="config-field">
+            <label class="config-label">Contraseña del día (alumnos)</label>
+            <input type="text" id="cfg-password" class="config-input" placeholder="Ej: excel2026">
+          </div>
+
+          <div class="config-field">
+            <div class="toggle-wrap">
+              <div>
+                <div class="toggle-label">Examen habilitado</div>
+                <div class="toggle-sub">Desactivar bloquea el acceso inmediatamente</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="cfg-enabled" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <button class="btn-save" onclick="saveConfig('access')">Guardar acceso</button>
+          <div class="save-confirm" id="save-access">✓ Guardado correctamente</div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="config-card">
+          <div class="config-card-title">📅 Horario del Examen</div>
+          <div class="config-card-sub">Define cuándo puede realizarse el examen. Deja en blanco para no restringir.</div>
+
+          <div class="config-field">
+            <label class="config-label">Fecha permitida</label>
+            <input type="date" id="cfg-date" class="config-input">
+          </div>
+
+          <div class="config-field">
+            <div class="config-row">
+              <div>
+                <label class="config-label">Hora de inicio</label>
+                <input type="time" id="cfg-start" class="config-input">
+              </div>
+              <div>
+                <label class="config-label">Hora de cierre</label>
+                <input type="time" id="cfg-end" class="config-input">
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-save" onclick="saveConfig('schedule')">Guardar horario</button>
+          <div class="save-confirm" id="save-schedule">✓ Guardado correctamente</div>
+        </div>
+
+        <!-- Exam Info -->
+        <div class="config-card" style="grid-column: 1 / -1;">
+          <div class="config-card-title">ℹ️ Información del Examen</div>
+          <div class="config-card-sub">Datos generales que aparecen en el encabezado de la evaluación.</div>
+          <div class="config-row">
+            <div class="config-field">
+              <label class="config-label">Título del examen</label>
+              <input type="text" id="cfg-title" class="config-input" placeholder="Evaluación — Computación y Programación">
+            </div>
+            <div class="config-field">
+              <label class="config-label">Admin — Cambiar contraseña de administrador</label>
+              <input type="password" id="cfg-adminpw" class="config-input" placeholder="Nueva contraseña admin (dejar vacío = no cambiar)">
+            </div>
+          </div>
+          <button class="btn-save" onclick="saveConfig('info')">Guardar información</button>
+          <div class="save-confirm" id="save-info">✓ Guardado correctamente</div>
+        </div>
+
+        <!-- Current config display -->
+        <div class="config-card" style="grid-column: 1 / -1; background: var(--surface2);">
+          <div class="config-card-title">📋 Configuración Activa</div>
+          <div class="config-card-sub">Así está configurado el examen en este momento.</div>
+          <div id="activeConfig" style="font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); line-height:2;"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== RESULTS TAB ===== -->
+    <div class="tab-content" id="tab-results">
+
+      <div class="stats-bar" id="statsBar">
+        <div class="stat-card">
+          <div class="stat-label">Total alumnos</div>
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-sub">evaluaciones registradas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Promedio general</div>
+          <div class="stat-value" id="statAvg">—</div>
+          <div class="stat-sub">de 40 puntos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Puntaje más alto</div>
+          <div class="stat-value" id="statHigh" style="color:var(--green)">—</div>
+          <div class="stat-sub">de 40 puntos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Puntaje más bajo</div>
+          <div class="stat-value" id="statLow" style="color:var(--red)">—</div>
+          <div class="stat-sub">de 40 puntos</div>
+        </div>
+      </div>
+
+      <div class="results-controls">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍  Buscar por nombre..." oninput="renderTable()">
+        <select class="filter-select" id="filterJornada" onchange="renderTable()">
+          <option value="">Todas las jornadas</option>
+          <option value="Diario">Diario</option>
+          <option value="Sábado">Sábado</option>
+          <option value="Domingo">Domingo</option>
+        </select>
+        <button class="btn-export" onclick="exportCSV()">⬇ Exportar CSV</button>
+        <button class="btn-clear" onclick="clearResults()">🗑 Limpiar resultados</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Alumno</th>
+              <th>Jornada</th>
+              <th>Máquina</th>
+              <th>Computación</th>
+              <th>Programación</th>
+              <th>Total</th>
+              <th>Hora</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+        <div class="empty-state" id="emptyState">
+          <div class="empty-state-icon">📭</div>
+          <div class="empty-state-title">Sin resultados aún</div>
+          <div class="empty-state-sub">Los resultados aparecerán aquí cuando los alumnos completen la evaluación.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SHEETS TAB ===== -->
+    <div class="tab-content" id="tab-sheets">
+      <div class="config-card">
+        <div class="config-card-title">🔗 Conexión con Google Sheets</div>
+        <div class="config-card-sub" style="margin-bottom:24px;">
+          Para guardar los resultados automáticamente en Google Sheets, necesitas crear un Google Apps Script que reciba los datos.<br><br>
+          <strong style="color:var(--text)">Pasos:</strong><br>
+          1. Ve a <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:12px;">script.google.com</code> y crea un nuevo proyecto.<br>
+          2. Pega el código que te mostramos abajo en el editor.<br>
+          3. Haz clic en "Implementar → Nueva implementación → Aplicación web".<br>
+          4. En "Quién tiene acceso" elige <strong>Cualquier persona</strong>.<br>
+          5. Copia la URL de la implementación y pégala aquí abajo.
+        </div>
+
+        <div class="config-field">
+          <label class="config-label">URL del Google Apps Script</label>
+          <div style="display:flex;gap:10px;">
+            <input type="url" id="sheetsUrl" class="config-input" placeholder="https://script.google.com/macros/s/...">
+            <button class="btn-save" onclick="saveSheetsUrl()" style="white-space:nowrap;margin-top:0;">Guardar URL</button>
+          </div>
+          <div class="save-confirm" id="save-sheets" style="margin-top:8px;">✓ URL guardada</div>
+        </div>
+
+        <div style="margin-top:24px;">
+          <div class="config-label" style="margin-bottom:12px;">Código para Google Apps Script</div>
+          <pre style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--text-dim);overflow-x:auto;line-height:1.7;">function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet()
+              .getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+
+  // Encabezados (solo primera vez)
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow([
+      'Fecha', 'Hora', 'Nombres', 'Apellidos',
+      'Jornada', 'No. Máquina',
+      'Comp. Correctas', 'Comp. Puntos',
+      'Prog. Correctas', 'Prog. Puntos',
+      'Total'
+    ]);
+  }
+
+  var end = new Date(data.endTime);
+  sheet.appendRow([
+    end.toLocaleDateString('es-GT'),
+    end.toLocaleTimeString('es-GT'),
+    data.nombres, data.apellidos,
+    data.jornada, data.maquina,
+    data.compCorrect, data.compPts,
+    data.progCorrect, data.progPts,
+    data.total
+  ]);
+
+  return ContentService
+    .createTextOutput(JSON.stringify({status:'ok'}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ============================================================
+// ADMIN PASSWORD (stored separately)
+// ============================================================
+const DEFAULT_ADMIN_PW = 'profesor2026';
+
+function getAdminPw() {
+  return localStorage.getItem('adminPassword') || DEFAULT_ADMIN_PW;
+}
+
+let isLoggedIn = false;
+
+function adminLogin() {
+  const pw = document.getElementById('adminPw').value;
+  if (pw === getAdminPw()) {
+    isLoggedIn = true;
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    loadConfig();
+    renderResults();
+    renderActiveConfig();
+  } else {
+    const el = document.getElementById('adminError');
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 3000);
+  }
+}
+
+function adminLogout() {
+  isLoggedIn = false;
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('adminLogin').style.display = 'flex';
+  document.getElementById('adminPw').value = '';
+}
+
+// ============================================================
+// CONFIG
+// ============================================================
+function getConfig() {
+  try {
+    const saved = localStorage.getItem('examConfig');
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return {
+    password: 'bio2026',
+    activeDate: '',
+    startTime: '',
+    endTime: '',
+    examTitle: 'Evaluación — Computación y Programación',
+    enabled: true
+  };
+}
+
+function saveFullConfig(cfg) {
+  localStorage.setItem('examConfig', JSON.stringify(cfg));
+}
+
+function loadConfig() {
+  const cfg = getConfig();
+  document.getElementById('cfg-password').value = cfg.password || '';
+  document.getElementById('cfg-enabled').checked = cfg.enabled !== false;
+  document.getElementById('cfg-date').value = cfg.activeDate || '';
+  document.getElementById('cfg-start').value = cfg.startTime || '';
+  document.getElementById('cfg-end').value = cfg.endTime || '';
+  document.getElementById('cfg-title').value = cfg.examTitle || '';
+
+  const sheetsUrl = localStorage.getItem('sheetsWebhookUrl') || '';
+  if (document.getElementById('sheetsUrl'))
+    document.getElementById('sheetsUrl').value = sheetsUrl;
+}
+
+function saveConfig(section) {
+  const cfg = getConfig();
+
+  if (section === 'access') {
+    cfg.password = document.getElementById('cfg-password').value.trim() || cfg.password;
+    cfg.enabled = document.getElementById('cfg-enabled').checked;
+  }
+
+  if (section === 'schedule') {
+    cfg.activeDate = document.getElementById('cfg-date').value;
+    cfg.startTime = document.getElementById('cfg-start').value;
+    cfg.endTime = document.getElementById('cfg-end').value;
+  }
+
+  if (section === 'info') {
+    const title = document.getElementById('cfg-title').value.trim();
+    if (title) cfg.examTitle = title;
+    const newPw = document.getElementById('cfg-adminpw').value;
+    if (newPw) {
+      localStorage.setItem('adminPassword', newPw);
+      document.getElementById('cfg-adminpw').value = '';
+    }
+  }
+
+  saveFullConfig(cfg);
+  renderActiveConfig();
+
+  const el = document.getElementById(`save-${section}`);
+  el.style.display = 'flex';
+  setTimeout(() => el.style.display = 'none', 2500);
+}
+
+function saveSheetsUrl() {
+  const url = document.getElementById('sheetsUrl').value.trim();
+  localStorage.setItem('sheetsWebhookUrl', url);
+  const el = document.getElementById('save-sheets');
+  el.style.display = 'flex';
+  setTimeout(() => el.style.display = 'none', 2500);
+}
+
+function renderActiveConfig() {
+  const cfg = getConfig();
+  const el = document.getElementById('activeConfig');
+  el.innerHTML = `
+    <span style="color:var(--text-muted)">Contraseña alumnos:</span> <span style="color:var(--accent2)">${cfg.password}</span><br>
+    <span style="color:var(--text-muted)">Estado:</span> <span style="color:${cfg.enabled ? 'var(--green)' : 'var(--red)'}">${cfg.enabled ? '✓ Habilitado' : '✗ Deshabilitado'}</span><br>
+    <span style="color:var(--text-muted)">Fecha:</span> ${cfg.activeDate || '<em style="color:var(--text-muted)">Cualquier fecha</em>'}<br>
+    <span style="color:var(--text-muted)">Horario:</span> ${cfg.startTime || '—'} → ${cfg.endTime || '—'}<br>
+    <span style="color:var(--text-muted)">Título:</span> ${cfg.examTitle}
+  `;
+}
+
+// ============================================================
+// RESULTS
+// ============================================================
+function getResults() {
+  try {
+    return JSON.parse(localStorage.getItem('examResults') || '[]');
+  } catch(e) { return []; }
+}
+
+function renderResults() {
+  const results = getResults();
+  const count = results.length;
+  document.getElementById('resultsCount').textContent = count;
+
+  // Stats
+  document.getElementById('statTotal').textContent = count;
+  if (count > 0) {
+    const totals = results.map(r => r.total);
+    const avg = (totals.reduce((a,b) => a+b, 0) / count).toFixed(1);
+    document.getElementById('statAvg').textContent = avg;
+    document.getElementById('statHigh').textContent = Math.max(...totals);
+    document.getElementById('statLow').textContent = Math.min(...totals);
+  }
+
+  renderTable();
+}
+
+function renderTable() {
+  const results = getResults();
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const jornadaFilter = document.getElementById('filterJornada').value;
+
+  let filtered = results.filter(r => {
+    const name = `${r.nombres} ${r.apellidos}`.toLowerCase();
+    const matchSearch = !search || name.includes(search);
+    const matchJornada = !jornadaFilter || r.jornada === jornadaFilter;
+    return matchSearch && matchJornada;
+  });
+
+  const tbody = document.getElementById('resultsBody');
+  const empty = document.getElementById('emptyState');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map((r, i) => {
+    const totalClass = r.total >= 30 ? 'total-high' : r.total >= 20 ? 'total-mid' : 'total-low';
+    const jClass = r.jornada === 'Diario' ? 'j-diario' : r.jornada === 'Sábado' ? 'j-sabado' : 'j-domingo';
+    const time = r.endTime ? new Date(r.endTime).toLocaleTimeString('es-GT', {hour:'2-digit',minute:'2-digit'}) : '—';
+
+    return `
+      <tr>
+        <td class="td-mono" style="color:var(--text-muted)">${i + 1}</td>
+        <td class="td-name">${r.nombres} ${r.apellidos}</td>
+        <td><span class="jornada-chip ${jClass}">${r.jornada}</span></td>
+        <td class="td-mono">${r.maquina}</td>
+        <td><span class="score-badge score-comp">${r.compPts}/20</span></td>
+        <td><span class="score-badge score-prog">${r.progPts}/20</span></td>
+        <td><span class="total-badge ${totalClass}">${r.total}/40</span></td>
+        <td class="td-mono" style="color:var(--text-muted)">${time}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function clearResults() {
+  if (!confirm('¿Estás seguro de que deseas eliminar TODOS los resultados? Esta acción no se puede deshacer.')) return;
+  localStorage.removeItem('examResults');
+  renderResults();
+}
+
+function exportCSV() {
+  const results = getResults();
+  if (results.length === 0) { alert('No hay resultados para exportar.'); return; }
+
+  const headers = ['Nombres','Apellidos','Jornada','No. Máquina','Comp. Correctas','Comp. Puntos','Prog. Correctas','Prog. Puntos','Total','Hora Finalización'];
+  const rows = results.map(r => [
+    r.nombres, r.apellidos, r.jornada, r.maquina,
+    r.compCorrect, r.compPts, r.progCorrect, r.progPts, r.total,
+    r.endTime ? new Date(r.endTime).toLocaleString('es-GT') : ''
+  ]);
+
+  const csv = [headers, ...rows].map(row => row.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `resultados_examen_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'results') renderResults();
+  if (name === 'config') loadConfig();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.getElementById('adminPw').addEventListener('keydown', e => {
+  if (e.key === 'Enter') adminLogin();
+});
+</script>
+</body>
+</html>
