@@ -1331,10 +1331,6 @@ function selectAnswer(qId, section, clickedBtn, selectedOpt, correctOpt) {
 
   allBtns.forEach(btn => {
     btn.disabled = true;
-    const optText = btn.querySelector('.option-text').textContent;
-    if (optText === correctOpt && !isCorrect) {
-      btn.classList.add('show-correct');
-    }
   });
 
   clickedBtn.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
