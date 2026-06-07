@@ -472,6 +472,13 @@
 
   .option-btn:disabled { cursor: default; transform: none; }
 
+  .option-btn.selected-neutral {
+    border-color: var(--accent);
+    background: rgba(59,130,246,0.1);
+  }
+
+  .question-card.answered-neutral::before { background: var(--accent); }
+
   .option-btn.selected-correct {
     border-color: var(--green);
     background: rgba(16,185,129,0.1);
@@ -736,18 +743,7 @@
       <div class="exam-logo">Evaluación Lab</div>
       <div class="student-badge" id="headerStudent"></div>
     </div>
-    <div class="score-display">
-      <div class="score-pill">
-        <div class="score-dot dot-comp"></div>
-        <span style="color:var(--text-muted);font-size:12px">Computación</span>
-        <span class="score-val" id="scoreComp" style="color:var(--comp-color)">—/20</span>
-      </div>
-      <div class="score-pill">
-        <div class="score-dot dot-prog"></div>
-        <span style="color:var(--text-muted);font-size:12px">Programación</span>
-        <span class="score-val" id="scoreProg" style="color:var(--prog-color)">—/20</span>
-      </div>
-    </div>
+    <div id="scoreComp" style="display:none"></div><div id="scoreProg" style="display:none"></div>
   </header>
 
   <div class="progress-bar-wrap">
@@ -793,23 +789,10 @@
     <div class="results-emoji" id="resultsEmoji">🎉</div>
     <div class="results-title">¡Evaluación completada!</div>
     <div class="results-name" id="resultsName"></div>
-    <div class="score-grid">
-      <div class="score-box score-box-comp">
-        <div class="score-box-label">Computación</div>
-        <div class="score-box-num" id="rComp">0</div>
-        <div class="score-box-total">de 20 puntos</div>
-      </div>
-      <div class="score-box score-box-prog">
-        <div class="score-box-label">Programación</div>
-        <div class="score-box-num" id="rProg">0</div>
-        <div class="score-box-total">de 20 puntos</div>
-      </div>
-    </div>
-    <div class="total-score-box">
-      <div class="total-score-label">Puntaje Total</div>
-      <div class="total-score-num" id="rTotal">0/40</div>
-    </div>
     <div class="results-msg" id="resultsMsg"></div>
+    <div id="rComp" style="display:none"></div>
+    <div id="rProg" style="display:none"></div>
+    <div id="rTotal" style="display:none"></div>
   </div>
 </div>
 
@@ -1333,10 +1316,9 @@ function selectAnswer(qId, section, clickedBtn, selectedOpt, correctOpt) {
     btn.disabled = true;
   });
 
-  clickedBtn.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
-  card.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+  clickedBtn.classList.add('selected-neutral');
+  card.classList.add('answered-neutral');
 
-  updateScores();
   updateProgress();
 
   if (answeredCount === totalQuestions) {
@@ -1433,26 +1415,6 @@ async function submitExam() {
   }
 
   showResults(compPts, progPts, total);
-}
-
-function showResults(compPts, progPts, total) {
-  document.getElementById('rComp').textContent = compPts;
-  document.getElementById('rProg').textContent = progPts;
-  document.getElementById('rTotal').textContent = `${total}/40`;
-  document.getElementById('resultsName').textContent =
-    `${studentData.nombres} ${studentData.apellidos}`;
-
-  const pct = (total / 40) * 100;
-  let emoji = '😔', msg = 'Sigue practicando, ¡la próxima lo harás mejor!';
-  if (pct >= 90) { emoji = '🏆'; msg = '¡Excelente resultado! Dominas muy bien los temas.'; }
-  else if (pct >= 75) { emoji = '🎉'; msg = '¡Muy buen trabajo! Tienes un sólido manejo de los temas.'; }
-  else if (pct >= 60) { emoji = '👍'; msg = '¡Aprobado! Hay algunos temas para reforzar.'; }
-  else if (pct >= 40) { emoji = '📚'; msg = 'Necesitas repasar los temas. ¡No te rindas!'; }
-
-  document.getElementById('resultsEmoji').textContent = emoji;
-  document.getElementById('resultsMsg').textContent = msg;
-  document.getElementById('resultsModal').style.display = 'flex';
-}
 
 // ============================================================
 // INIT
