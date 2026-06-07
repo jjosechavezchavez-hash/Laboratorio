@@ -1446,8 +1446,10 @@ async function submitExam() {
     existing.push(result);
     localStorage.setItem('examResults', JSON.stringify(existing));
 
-    // Send to Google Sheets if configured
-    const sheetsUrl = localStorage.getItem('sheetsWebhookUrl') || '';
+    // Send to Google Sheets
+    // ⚠️ IMPORTANTE: Pega aquí tu URL del Apps Script para que funcione en todas las PCs
+    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyxsPLvjJYS1N6O3RQp8BXJi7GE4mtQxZ3sEv9GhKYPa2BkbPWdCH_n3pgeVhQxE7jerg/exec';
+    const sheetsUrl = SHEETS_URL !== 'PEGA_TU_URL_AQUI' ? SHEETS_URL : (localStorage.getItem('sheetsWebhookUrl') || '');
     if (sheetsUrl) {
       try {
         await fetch(sheetsUrl, {
