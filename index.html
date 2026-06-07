@@ -1188,13 +1188,27 @@ function checkAlreadyDone() {
   if (!done) return false;
   try {
     const d = JSON.parse(done);
-    // Reset if date changed (new exam day)
+
+    // Si hay fecha configurada en el admin y es diferente al día que se hizo, se libera
     if (cfg.activeDate && d.date !== cfg.activeDate) {
       localStorage.removeItem(STORAGE_KEY);
       return false;
     }
+
+    // Si no hay fecha configurada, comparar con la fecha real de hoy
+    if (!cfg.activeDate) {
+      const today = new Date().toISOString().slice(0, 10);
+      if (d.date !== today) {
+        localStorage.removeItem(STORAGE_KEY);
+        return false;
+      }
+    }
+
     return true;
-  } catch(e) { return false; }
+  } catch(e) {
+    localStorage.removeItem(STORAGE_KEY);
+    return false;
+  }
 }
 
 // ============================================================
