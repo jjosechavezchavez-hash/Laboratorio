@@ -587,9 +587,37 @@
     background: linear-gradient(90deg, var(--comp-color), var(--green), var(--prog-color));
   }
 
-  .results-emoji { font-size: 64px; margin-bottom: 16px; }
-  .results-title { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
-  .results-name { color: var(--accent2); font-size: 18px; font-weight: 600; margin-bottom: 28px; }
+  .results-icon {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: rgba(16,185,129,0.1);
+    border: 2px solid rgba(16,185,129,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 28px;
+  }
+
+  .results-icon svg { width: 36px; height: 36px; stroke: var(--green); }
+
+  .results-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .results-name {
+    color: var(--accent2);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    background: rgba(6,182,212,0.08);
+    border: 1px solid rgba(6,182,212,0.2);
+    border-radius: 10px;
+    padding: 10px 20px;
+    display: inline-block;
+  }
 
   .score-grid {
     display: grid;
@@ -786,13 +814,18 @@
 <!-- ========== RESULTS MODAL ========== -->
 <div id="resultsModal">
   <div class="results-card">
-    <div class="results-emoji" id="resultsEmoji">🎉</div>
-    <div class="results-title">¡Evaluación completada!</div>
+    <div class="results-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+    </div>
+    <div class="results-title">Evaluación Completada</div>
     <div class="results-name" id="resultsName"></div>
     <div class="results-msg" id="resultsMsg"></div>
     <div id="rComp" style="display:none"></div>
     <div id="rProg" style="display:none"></div>
     <div id="rTotal" style="display:none"></div>
+    <div id="resultsEmoji" style="display:none"></div>
   </div>
 </div>
 
@@ -1358,6 +1391,17 @@ function updateProgress() {
 // ============================================================
 // SUBMIT
 // ============================================================
+function showResults(compPts, progPts, total) {
+  document.getElementById('rComp').textContent = compPts;
+  document.getElementById('rProg').textContent = progPts;
+  document.getElementById('rTotal').textContent = total;
+  document.getElementById('resultsName').textContent =
+    `${studentData.nombres} ${studentData.apellidos}`;
+  document.getElementById('resultsMsg').textContent =
+    'Tu evaluación ha sido enviada correctamente. Puedes cerrar esta ventana.';
+  document.getElementById('resultsModal').style.display = 'flex';
+}
+
 async function submitExam() {
   if (examSubmitted) return;
   examSubmitted = true;
@@ -1379,46 +1423,47 @@ async function submitExam() {
   const total = compPts + progPts;
   const endTime = new Date().toISOString();
 
-  // Save done flag
-  const cfg = getConfig();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    date: cfg.activeDate || new Date().toISOString().slice(0,10),
-    time: endTime
-  }));
+  try {
+    // Save done flag
+    const cfg = getConfig();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      date: cfg.activeDate || new Date().toISOString().slice(0,10),
+      time: endTime
+    }));
 
-  // Save result for admin panel
-  const result = {
-    ...studentData,
-    compCorrect, progCorrect,
-    compPts, progPts, total,
-    endTime,
-    selectedCompIds: selectedComp.map(q => q.id),
-    answers: Object.fromEntries(Object.entries(answers).map(([k,v]) => [k, v.isCorrect]))
-  };
+    // Save result for admin panel
+    const result = {
+      ...studentData,
+      compCorrect, progCorrect,
+      compPts, progPts, total,
+      endTime,
+      selectedCompIds: selectedComp.map(q => q.id),
+      answers: Object.fromEntries(Object.entries(answers).map(([k,v]) => [k, v.isCorrect]))
+    };
 
-  // Store in localStorage for admin to retrieve
-  const existing = JSON.parse(localStorage.getItem('examResults') || '[]');
-  existing.push(result);
-  localStorage.setItem('examResults', JSON.stringify(existing));
+    // Store in localStorage for admin to retrieve
+    const existing = JSON.parse(localStorage.getItem('examResults') || '[]');
+    existing.push(result);
+    localStorage.setItem('examResults', JSON.stringify(existing));
 
-  // Send to Google Sheets if configured
-  const sheetsUrl = localStorage.getItem('sheetsWebhookUrl') || '';
-  if (sheetsUrl) {
-    try {
-      await fetch(sheetsUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(result)
-      });
-    } catch(e) { console.warn('Sheets error:', e); }
+    // Send to Google Sheets if configured
+    const sheetsUrl = localStorage.getItem('sheetsWebhookUrl') || '';
+    if (sheetsUrl) {
+      try {
+        await fetch(sheetsUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(result)
+        });
+      } catch(e) { console.warn('Sheets error:', e); }
+    }
+  } catch(e) {
+    console.warn('Submit error:', e);
   }
 
   showResults(compPts, progPts, total);
 }
-
-
-
 
 // ============================================================
 // INIT
