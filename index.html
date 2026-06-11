@@ -833,19 +833,29 @@
 // ============================================================
 // CONFIGURATION — loaded from config.js / localStorage (admin)
 // ============================================================
+// ============================================================
+// CONFIGURACIÓN BASE — Edita aquí los valores por defecto.
+// Estos aplican en TODAS las PCs del laboratorio.
+// Los cambios desde el panel admin solo afectan esa PC.
+// ============================================================
+const BASE_CONFIG = {
+  password: 'bio2026',       // Contraseña que usan los alumnos
+  activeDate: '',            // Fecha permitida 'YYYY-MM-DD' o vacío = cualquier día
+  startTime: '',             // Hora inicio 'HH:MM' o vacío = sin restricción
+  endTime: '',               // Hora fin   'HH:MM' o vacío = sin restricción
+  examTitle: 'Evaluación — Computación y Programación',
+  enabled: true              // true = habilitado, false = bloqueado
+};
+
 function getConfig() {
   try {
     const saved = localStorage.getItem('examConfig');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      // Mezcla: lo guardado en localStorage sobreescribe BASE_CONFIG
+      return Object.assign({}, BASE_CONFIG, JSON.parse(saved));
+    }
   } catch(e) {}
-  return {
-    password: 'bio2026',
-    activeDate: '',       // 'YYYY-MM-DD' or empty = any day
-    startTime: '',        // 'HH:MM' or empty
-    endTime: '',          // 'HH:MM' or empty
-    examTitle: 'Evaluación — Computación y Programación',
-    enabled: true
-  };
+  return { ...BASE_CONFIG };
 }
 
 // ============================================================
